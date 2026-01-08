@@ -1,0 +1,32 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;      /* app em coluna */
+  background-color: var(--ipca-bg-light);
+  color: var(--ipca-text-main);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.main {
+  flex: 1;                     /* ocupa o espaço entre navbar e footer */
+  padding: 2rem 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+
+.hero {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.hero h1 {
+  color: #005321;
+  margin-bottom: 0.5rem;
+}
+
+.hero p {
+  color: #555;
+}
