@@ -7,6 +7,7 @@ import Footer from "./Footer/Footer";
 import StockPage from "./StockPage/StockPage";
 import DonationsPage from "./DonationsPage/DonationsPage";
 import CampaignsPage from "./CampaignsPage/CampaignsPage";
+import HomePage from "./HomePage/HomePage";
 
 import styles from "./App.module.css";
 
@@ -18,10 +19,14 @@ function App() {
 
         <main className={styles.main}>
           <Routes>
-            {/* Redireciona automaticamente "/" para "/stock" */}
-            <Route path="/" element={<Navigate to="/stock" replace />} />
+            {/* Redireciona automaticamente "/" para "/HomePage" */}
+
+            <Route path="/" element={<Navigate to="/HomePage" replace />} />
 
             {/* Página principal */}
+            <Route path="/HomePage" element={<HomePage />} />
+
+            {/* Página de Stock */}
             <Route path="/stock" element={<StockPage />} />
 
             {/* Outras páginas */}
