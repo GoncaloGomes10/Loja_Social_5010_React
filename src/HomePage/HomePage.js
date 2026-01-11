@@ -88,23 +88,7 @@ function HomePage() {
               </div>
             </div>
 
-            {/* Card 3: Doações */}
-            <div className="col-md-4">
-              <div className="card h-100 border-0 shadow-sm rounded-4 hover-up">
-                <div className="card-body p-4 text-center">
-                  <div className="bg-primary bg-opacity-10 text-primary p-3 rounded-circle d-inline-block mb-3">
-                    <i className="bi bi-heart-fill fs-3"></i>
-                  </div>
-                  <h3 className="fs-4 fw-bold">Fazer Doação</h3>
-                  <p className="text-muted">
-                    Saiba como contribuir com bens alimentares e de higiene.
-                  </p>
-                  <Link to="/doacoes" className="btn btn-link text-primary text-decoration-none fw-bold">
-                    Ver doação &rarr;
-                  </Link>
-                </div>
-              </div>
-            </div>
+
 
           </div>
         </div>
