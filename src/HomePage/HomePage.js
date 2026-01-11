@@ -27,7 +27,7 @@ function HomePage() {
                   <i className="bi bi-box-seam me-2"></i>
                   Consultar Stock
                 </Link>
-                <Link to="/doacoes" className="btn btn-outline-light btn-lg px-4">
+                <Link to="/campanhas" className="btn btn-outline-light btn-lg px-4">
                   Quero Ajudar
                 </Link>
               </div>
