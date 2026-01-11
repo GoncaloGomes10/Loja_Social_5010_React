@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 // Certifica-te de ter os ícones instalados (npm install bootstrap-icons)
 
 function HomePage() {
-  const ipcaGreen = "#004725"; // Verde IPCA
+  const ipcaGreen = "#005520"; // Verde IPCA
 
   return (
     // bg-light aplicado aqui define a cor de fundo de TUDO (o tal "bege" suave)
