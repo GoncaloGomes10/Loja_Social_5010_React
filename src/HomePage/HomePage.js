@@ -100,7 +100,7 @@ function HomePage() {
                     Saiba como contribuir com bens alimentares e de higiene.
                   </p>
                   <Link to="/doacoes" className="btn btn-link text-primary text-decoration-none fw-bold">
-                    Registar doação &rarr;
+                    Ver doação &rarr;
                   </Link>
                 </div>
               </div>

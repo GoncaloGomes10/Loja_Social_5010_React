@@ -50,12 +50,6 @@ function Navbar() {
             </li>
 
             <li className="nav-item">
-              <Link to="/doacoes" className="nav-link text-white">
-                Doações
-              </Link>
-            </li>
-
-            <li className="nav-item">
               <Link to="/campanhas" className="nav-link text-white">
                 Campanhas
               </Link>

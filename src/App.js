@@ -5,7 +5,6 @@ import Navbar from "./Navbar/Navbar";
 import Footer from "./Footer/Footer";
 
 import StockPage from "./StockPage/StockPage";
-import DonationsPage from "./DonationsPage/DonationsPage";
 import CampaignsPage from "./CampaignsPage/CampaignsPage";
 import HomePage from "./HomePage/HomePage";
 
@@ -30,7 +29,7 @@ function App() {
             <Route path="/stock" element={<StockPage />} />
 
             {/* Outras páginas */}
-            <Route path="/doacoes" element={<DonationsPage />} />
+
             <Route path="/campanhas" element={<CampaignsPage />} />
           </Routes>
         </main>

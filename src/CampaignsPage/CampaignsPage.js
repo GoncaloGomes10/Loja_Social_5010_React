@@ -1,38 +1,37 @@
 import React, { useEffect, useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-// Certifica-te de ter o Bootstrap Icons no index.html
+import { db } from "../firebase";
+import { collection, onSnapshot } from "firebase/firestore";
 
 function CampaignsPage() {
   const [campaigns, setCampaigns] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 🔒 FIRESTORE COMENTADO
-    /*
-    import { db } from "../../firebase";
-    import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+    const campaignsCollection = collection(db, "campanhas");
 
-    const q = query(collection(db, "campaigns"), orderBy("data", "desc"));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const camps = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const unsubscribe = onSnapshot(campaignsCollection, (snapshot) => {
+      const camps = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          titulo: data.nome, 
+          descricao: data.descricao,  
+          dataInicio: data.dataInicio,
+          dataFim: data.dataFim
+        };
+      });
+      
       setCampaigns(camps);
+      setLoading(false);
     });
 
     return () => unsubscribe();
-    */
-
-    // ⚠️ DADOS DE TESTE
-    setCampaigns([
-      { id: 1, titulo: "Campanha de Inverno", descricao: "Estamos a recolher agasalhos, cobertores e aquecedores para as noites frias." },
-      { id: 2, titulo: "Natal Solidário", descricao: "Recolha de alimentos não perecíveis e brinquedos para distribuir cabazes." }
-    ]);
   }, []);
 
   return (
-    // Fundo cinza claro e altura total
     <div className="d-flex flex-column py-5">
       
-      {/* Container centralizado */}
       <div className="container" style={{ maxWidth: "900px" }}>
         
         {/* CABEÇALHO */}
@@ -41,7 +40,7 @@ function CampaignsPage() {
           <p className="text-muted">Iniciativas ativas para ajudar a comunidade</p>
         </div>
 
-        {/* --- ESTATÍSTICA RÁPIDA (Topo) --- */}
+        {/* --- ESTATÍSTICA RÁPIDA --- */}
         <div className="row justify-content-center mb-5">
             <div className="col-md-4">
                 <div className="card border-0 shadow-sm rounded-4 text-center">
@@ -56,11 +55,18 @@ function CampaignsPage() {
             </div>
         </div>
 
-        {/* --- GRID DE CAMPANHAS (Substitui a lista simples) --- */}
+        {/* --- GRID DE CAMPANHAS --- */}
         <div className="row g-4">
-            {campaigns.map((c) => (
+            {loading && (
+                <div className="text-center py-5">
+                    <div className="spinner-border text-success" role="status">
+                        <span className="visually-hidden">A carregar...</span>
+                    </div>
+                </div>
+            )}
+
+            {!loading && campaigns.map((c) => (
                 <div className="col-md-6" key={c.id}>
-                    {/* Cartão individual para cada campanha */}
                     <div className="card h-100 border-0 shadow-sm rounded-4 hover-shadow transition">
                         <div className="card-body p-4 d-flex flex-column">
                             
@@ -77,11 +83,18 @@ function CampaignsPage() {
                                 {c.descricao}
                             </p>
 
-                            {/* Botão / Link (Decorativo) */}
-                            <div className="mt-3 pt-3 border-top border-light d-flex justify-content-between align-items-center">
-                                <span className="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">
-                                    A decorrer
-                                </span>
+                            {/* Datas e Status */}
+                            <div className="mt-3 pt-3 border-top border-light">
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <small className="text-muted">
+                                        <i className="bi bi-clock me-1"></i> 
+                                        {c.dataInicio} até {c.dataFim}
+                                    </small>
+                                    
+                                    <span className="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">
+                                        Ativa
+                                    </span>
+                                </div>
                             </div>
 
                         </div>
@@ -90,10 +103,10 @@ function CampaignsPage() {
             ))}
         </div>
 
-        {/* Estado Vazio (Caso não haja campanhas) */}
-        {campaigns.length === 0 && (
+        {/* Estado Vazio */}
+        {!loading && campaigns.length === 0 && (
             <div className="text-center py-5">
-                <p className="text-muted">Nenhuma campanha ativa de momento.</p>
+                <p className="text-muted">Nenhuma campanha encontrada.</p>
             </div>
         )}
 

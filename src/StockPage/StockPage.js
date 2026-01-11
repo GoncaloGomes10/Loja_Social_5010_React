@@ -1,32 +1,58 @@
 import React, { useEffect, useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-// Certifica-te de ter o Bootstrap e Bootstrap Icons importados
+import { db } from "../firebase";
+// ADICIONADO: 'getDocs' para ler a subcoleção de uma só vez
+import { collection, onSnapshot, getDocs } from "firebase/firestore";
 
 function StockPage() {
   const [stock, setStock] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 🔒 LÓGICA FIRESTORE (MANTIDA)
-    /*
-    import { db } from "../../firebase";
-    import { collection, onSnapshot } from "firebase/firestore";
-    const unsubscribe = onSnapshot(collection(db, "stock"), (snapshot) => {
-      const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setStock(items);
-    });
-    return () => unsubscribe();
-    */
+    const produtosCollection = collection(db, "produtos");
 
-    // ⚠️ DADOS DE TESTE
-    setStock([
-      { id: 1, nome: "Arroz", quantidade: 20, categoria: "Alimentar" },
-      { id: 2, nome: "Shampoo", quantidade: 10, categoria: "Higiene" },
-      { id: 3, nome: "Massa", quantidade: 35, categoria: "Alimentar" },
-    ]);
+    // Escuta a coleção de produtos em tempo real
+    const unsubscribe = onSnapshot(produtosCollection, async (snapshot) => {
+      
+      // Criamos uma lista de Promessas, pois para cada produto vamos ter que ir buscar os lotes
+      const promises = snapshot.docs.map(async (docProduto) => {
+        const data = docProduto.data();
+        
+        // 1. Referência para a subcoleção "lotes" deste produto específico
+        const lotesRef = collection(db, "produtos", docProduto.id, "lotes");
+        
+        // 2. Busca todos os documentos dentro de "lotes"
+        const lotesSnapshot = await getDocs(lotesRef);
+        
+        // 3. Calcula a soma das quantidades dos lotes
+        const somaLotes = lotesSnapshot.docs.reduce((acc, docLote) => {
+          const dadosLote = docLote.data();
+          return acc + (Number(dadosLote.quantidade) || 0);
+        }, 0);
+
+        return {
+          id: docProduto.id,
+          nome: data.nome,
+          // AQUI ESTÁ A MUDANÇA: Usamos a soma calculada, não o campo do pai
+          quantidade: somaLotes, 
+          categoria: data.categoria || "Geral", 
+          descricao: data.descricao
+        };
+      });
+
+      // Aguarda que todos os cálculos de lotes terminem antes de mostrar na tela
+      const itemsComSoma = await Promise.all(promises);
+      
+      setStock(itemsComSoma);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  // --- CÁLCULOS ---
+  // --- CÁLCULOS (Mantidos iguais) ---
   const totalProdutos = stock.length;
+  // Agora este reduce vai usar a quantidade correta vinda dos lotes
   const totalUnidades = stock.reduce((acc, item) => acc + Number(item.quantidade), 0);
   const totalCategorias = [...new Set(stock.map(item => item.categoria))].length;
 
@@ -37,16 +63,13 @@ function StockPage() {
   };
 
   return (
-    // Fundo cinza claro na página toda (min-vh-100 garante que cobre a tela toda)
-    <div className="py-5">
-      
-      {/* Container transparente: O conteúdo dita a altura, sem sobrar espaço branco */}
+    <div className="d-flex flex-column py-5">
       <div className="container" style={{ maxWidth: "900px" }}>
         
-        {/* --- CABEÇALHO (Agora fica sobre o fundo cinza, sem caixa branca) --- */}
+        {/* CABEÇALHO */}
         <div className="text-center mb-5">
           <h1 className="fw-bold text-success display-6">Stock da Loja Social</h1>
-          <p className="text-muted">Gestão de inventário e produtos disponíveis</p>
+          <p className="text-muted">Gestão de inventário</p>
         </div>
 
         {/* --- CARDS DE ESTATÍSTICAS --- */}
@@ -69,7 +92,7 @@ function StockPage() {
             <div className="card border-0 shadow-sm h-100 rounded-4">
               <div className="card-body d-flex align-items-center justify-content-between p-3">
                 <div>
-                  <span className="text-muted small fw-bold">Unidades</span>
+                  <span className="text-muted small fw-bold">Unidades Totais</span>
                   <h3 className="fw-bold text-success mb-0">{totalUnidades}</h3>
                 </div>
                 <div className="bg-success bg-opacity-10 p-2 rounded-circle text-success">
@@ -94,9 +117,8 @@ function StockPage() {
           </div>
         </div>
 
-        {/* --- TABELA PRINCIPAL (Único bloco grande branco) --- */}
+        {/* --- TABELA --- */}
         <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
-          
           <div className="card-header bg-success text-white py-3 px-4 d-flex align-items-center">
             <i className="bi bi-box-seam me-2"></i>
             <h6 className="mb-0 fw-bold">Inventário Atual</h6>
@@ -108,19 +130,29 @@ function StockPage() {
                 <thead className="bg-light text-secondary small text-uppercase">
                   <tr>
                     <th className="py-3 ps-4 border-0">Produto</th>
-                    <th className="py-3 border-0">Quantidade</th>
+                    <th className="py-3 border-0">Quantidade Total</th>
                     <th className="py-3 border-0">Categoria</th>
                   </tr>
                 </thead>
                 <tbody>
+                  {loading && (
+                    <tr><td colSpan="3" className="text-center py-4">A carregar produtos e calcular lotes...</td></tr>
+                  )}
+                  
+                  {!loading && stock.length === 0 && (
+                    <tr><td colSpan="3" className="text-center py-4 text-muted">Ainda não há produtos registados.</td></tr>
+                  )}
+
                   {stock.map((item) => (
                     <tr key={item.id} className="border-bottom border-light">
-                      <td className="ps-4 fw-bold text-dark py-3">
-                        {item.nome}
+                      <td className="ps-4 py-3">
+                        <div className="fw-bold text-dark">{item.nome}</div>
+                        <small className="text-muted">{item.descricao}</small>
                       </td>
                       <td>
-                        <span className="badge bg-light text-dark border fw-normal rounded-pill px-3">
-                          {item.quantidade}
+                        {/* Exibe quantidade baseada na soma dos lotes */}
+                        <span className={`badge border fw-normal rounded-pill px-3 ${item.quantidade > 0 ? 'bg-light text-dark' : 'bg-danger bg-opacity-10 text-danger'}`}>
+                          {item.quantidade} un
                         </span>
                       </td>
                       <td>
@@ -134,15 +166,6 @@ function StockPage() {
               </table>
             </div>
           </div>
-
-          {/* Rodapé Pequeno */}
-          <div className="card-footer bg-white border-0 py-3 px-4">
-             <small className="text-muted">
-               <i className="bi bi-info-circle me-1"></i> 
-               Mostrando {stock.length} registos
-             </small>
-          </div>
-
         </div>
 
       </div>
